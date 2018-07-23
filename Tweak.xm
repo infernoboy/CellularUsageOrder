@@ -46,7 +46,7 @@ BOOL enabled = YES;
 
                 if (![[self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:section]] isKindOfClass:[%c(PSSubtitleSwitchTableCell) class]]) {
                     size = 1000000000000;
-                } else 
+                } else {
                     NSString *sizeString = [self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:section]].detailTextLabel.text;
                                 
                     size = [sizeString floatValue];

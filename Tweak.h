@@ -1,5 +1,3 @@
-#import "Entry.h"
-
 @interface PSSpecifier
 @property(strong, nonatomic) NSString *identifier;
 @end

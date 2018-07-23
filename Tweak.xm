@@ -33,6 +33,7 @@ BOOL enabled = YES;
 
         if (result > 1) {
             NSInteger num;
+            
             if ([[self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:result - 2 inSection:section]] isKindOfClass:[%c(PSSubtitleSwitchTableCell) class]])
                 num = result - 1;
             else
@@ -41,13 +42,13 @@ BOOL enabled = YES;
             NSMutableArray *data = [NSMutableArray arrayWithCapacity:num];
 
             for (NSInteger i = 0; i < num; i++) {
-                NSString *sizeString = [self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:section]].detailTextLabel.text;
-
                 float size;
 
                 if (![[self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:section]] isKindOfClass:[%c(PSSubtitleSwitchTableCell) class]]) {
-                    size = 100000000;
-                } else {
+                    size = 1000000000000;
+                } else 
+                    NSString *sizeString = [self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:section]].detailTextLabel.text;
+                                
                     size = [sizeString floatValue];
 
                     NSInteger length = [sizeString length];
@@ -84,6 +85,7 @@ BOOL enabled = YES;
             count = num;
         }
     }
+    
     return result;
 }
 
@@ -100,6 +102,7 @@ BOOL enabled = YES;
         
         [view reloadData];
     }
+    
     %orig;
 }
 

@@ -1,8 +1,9 @@
-Package: com.ccdog.cellularusageorder
-Name: CellularUsageOrder
+Package: com.toggleable.cellularusageorderxi
+Name: CellularUsageOrderXI
 Depends: firmware (>= 7.0), mobilesubstrate
-Version: 1.2
+Version: 1.0
 Architecture: iphoneos-arm
 Description: Order Cellular Data Usage by Size.
-Author: CC-Dog <cc941201@gmail.com>
+Maintainer: Travis Roman
+Author: Travis Roman <travis@toggleable.com>
 Section: Tweaks

@@ -1,1 +1,1 @@
-{ Filter = { Bundles = ( "com.apple.preferences-framework" ); }; }
+{ Filter = { Bundles = ( "com.apple.Preferences" ); }; }

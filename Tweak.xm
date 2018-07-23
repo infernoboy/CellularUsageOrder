@@ -4,14 +4,25 @@
 
 NSArray *map;
 NSInteger count, cellularSectionNumber;
-NSString *cellularDataTitle = NSLocalizedString(@"Cellular Data", nil);
+NSString *cellularDataTitle;
 
 BOOL enabled = YES;
+BOOL didLoadStrings = NO;
 
 - (NSInteger)numberOfSectionsInTableView:(id)view {
     NSInteger result = %orig;
 
     if ([[self specifier].identifier isEqualToString:@"MOBILE_DATA_SETTINGS_ID"]) {
+        if (!didLoadStrings) {            
+            didLoadStrings = YES;
+
+            NSBundle *preferencesUI = [NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/PreferencesUI.framework"];
+            
+            cellularDataTitle = [preferencesUI localizedStringForKey:@"APP_DATA_USAGE" value:@"" table:@"Network~iphone"];
+
+            preferencesUI = nil;
+        }
+
         if ([[self tableView:view titleForHeaderInSection:0] isEqualToString:cellularDataTitle])
             cellularSectionNumber = 0;
         else if ([[self tableView:view titleForHeaderInSection:1] isEqualToString:cellularDataTitle])

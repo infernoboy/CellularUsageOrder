@@ -84,34 +84,37 @@ NSString *preferencesUIPath = @"/System/Library/PrivateFrameworks/PreferencesUI.
                         size = 1000000000000;
                     } else {
                         NSString *sizeString = [self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:section]].detailTextLabel.text;
-                                    
-                        size = [sizeString floatValue];
-
                         NSInteger length = [sizeString length];
 
-                        if (length > 2)
-                            switch ([sizeString characterAtIndex:length - 2]) {
-                                case 'M':
-                                    size *= 1024;
-                                    break;
-                                case 'G':
-                                    size *= 1024 * 1024;
-                                    break;
-                                case 'T':
-                                    size *= 1024 * 1024 * 1024;
+                        if (length > 0) {
+                            size = [sizeString floatValue];
+
+                            if (length > 2)
+                                switch ([sizeString characterAtIndex:length - 2]) {
+                                    case 'M':
+                                        size *= 1024;
+                                        break;
+                                    case 'G':
+                                        size *= 1024 * 1024;
+                                        break;
+                                    case 'T':
+                                        size *= 1024 * 1024 * 1024;
+                                }
+                            if (length > 3) {
+                                switch ([sizeString characterAtIndex:length - 3]) {
+                                    case L'מ':
+                                        size *= 1024;
+                                        break;
+                                    case L'ג':
+                                        size *= 1024 * 1024;
+                                }
                             }
-                        if (length > 3) {
-                            switch ([sizeString characterAtIndex:length - 3]) {
-                                case L'מ':
-                                    size *= 1024;
-                                    break;
-                                case L'ג':
-                                    size *= 1024 * 1024;
-                            }
+                        } else {
+                            size = 0;
                         }
                     }
            
-                    [data addObject:@[[NSNumber numberWithInt:i], [NSNumber numberWithInt:size]]];
+                    [data addObject:@[[NSNumber numberWithInt:i], [NSNumber numberWithFloat:size]]];
                 }
 
                 map = [data sortedArrayUsingComparator:^NSComparisonResult(NSMutableArray *a, NSMutableArray *b) {
@@ -129,9 +132,12 @@ NSString *preferencesUIPath = @"/System/Library/PrivateFrameworks/PreferencesUI.
 }
 
 - (id)tableView:(id)view cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (enabled && indexPath.row < count && [[self specifier].identifier isEqualToString:@"MOBILE_DATA_SETTINGS_ID"] && indexPath.section == cellularSectionNumber && [self isViewLoaded] && self.view.window != nil)
+    if (enabled && indexPath.row < count && [[self specifier].identifier isEqualToString:@"MOBILE_DATA_SETTINGS_ID"] && indexPath.section == cellularSectionNumber && [self isViewLoaded] && self.view.window != nil) {
+        if (map == nil)
+            [self tableView:view numberOfRowsInSection:indexPath.section];
+            
         return %orig(view, [NSIndexPath indexPathForRow:[map[indexPath.row][0] intValue] inSection:indexPath.section]);
-    else
+    } else
         return %orig;
 }
 

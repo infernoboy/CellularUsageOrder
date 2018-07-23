@@ -3,7 +3,7 @@
 %hook PSListController
 
 NSArray *map;
-NSInteger count, cellularSectionNumber;
+NSInteger count, num, cellularSectionNumber;
 NSString *cellularDataTitle;
 
 BOOL enabled = YES;
@@ -62,70 +62,76 @@ NSString *preferencesUIPath = @"/System/Library/PrivateFrameworks/PreferencesUI.
     NSInteger result = %orig;
 
     if ([[self specifier].identifier isEqualToString:@"MOBILE_DATA_SETTINGS_ID"] && section == cellularSectionNumber && [self isViewLoaded] && self.view.window != nil) {
-        count = 0;
+        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
-        if (result > 1) {
-            NSInteger num;
-            
-            if ([[self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:result - 2 inSection:section]] isKindOfClass:[%c(PSSubtitleSwitchTableCell) class]])
-                num = result - 1;
-            else
-                num = result - 2;
+        dispatch_async(queue, ^{
+            count = 0;
 
-            if ([map count] == num) {
-                count = num;
-            } else {
-                NSMutableArray *data = [NSMutableArray arrayWithCapacity:num];
+            if (result > 1) {
+                if ([[self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:result - 2 inSection:section]] isKindOfClass:[%c(PSSubtitleSwitchTableCell) class]])
+                    num = result - 1;
+                else
+                    num = result - 2;
 
-                for (NSInteger i = 0; i < num; i++) {
-                    float size;
+                if ([map count] == num) {
+                    count = num;
+                } else {
+                    NSMutableArray *data = [NSMutableArray arrayWithCapacity:num];
 
-                    if (![[self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:section]] isKindOfClass:[%c(PSSubtitleSwitchTableCell) class]]) {
-                        size = 1000000000000;
-                    } else {
-                        NSString *sizeString = [self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:section]].detailTextLabel.text;
-                        NSInteger length = [sizeString length];
+                    for (NSInteger i = 0; i < num; i++) {
+                        float size;
 
-                        if (length > 0) {
-                            size = [sizeString floatValue];
-
-                            if (length > 2)
-                                switch ([sizeString characterAtIndex:length - 2]) {
-                                    case 'M':
-                                        size *= 1024;
-                                        break;
-                                    case 'G':
-                                        size *= 1024 * 1024;
-                                        break;
-                                    case 'T':
-                                        size *= 1024 * 1024 * 1024;
-                                }
-                            if (length > 3) {
-                                switch ([sizeString characterAtIndex:length - 3]) {
-                                    case L'מ':
-                                        size *= 1024;
-                                        break;
-                                    case L'ג':
-                                        size *= 1024 * 1024;
-                                }
-                            }
+                        if (![[self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:section]] isKindOfClass:[%c(PSSubtitleSwitchTableCell) class]]) {
+                            size = 1000000000000;
                         } else {
-                            size = 0;
+                            NSString *sizeString = [self tableView:view cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:section]].detailTextLabel.text;
+                            NSInteger length = [sizeString length];
+
+                            if (length > 0) {
+                                size = [sizeString floatValue];
+
+                                if (length > 2)
+                                    switch ([sizeString characterAtIndex:length - 2]) {
+                                        case 'M':
+                                            size *= 1024;
+                                            break;
+                                        case 'G':
+                                            size *= 1024 * 1024;
+                                            break;
+                                        case 'T':
+                                            size *= 1024 * 1024 * 1024;
+                                    }
+                                if (length > 3) {
+                                    switch ([sizeString characterAtIndex:length - 3]) {
+                                        case L'מ':
+                                            size *= 1024;
+                                            break;
+                                        case L'ג':
+                                            size *= 1024 * 1024;
+                                    }
+                                }
+                            } else {
+                                size = 0;
+                            }
                         }
+               
+                        [data addObject:@[[NSNumber numberWithInt:i], [NSNumber numberWithFloat:size]]];
                     }
-           
-                    [data addObject:@[[NSNumber numberWithInt:i], [NSNumber numberWithFloat:size]]];
+
+                    map = [data sortedArrayUsingComparator:^NSComparisonResult(NSMutableArray *a, NSMutableArray *b) {
+                        return [b[1] compare: a[1]];
+                    }];
+
+                    data = nil;
+
+                    count = num;
+
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self animatedReloadDataWithView:view];
+                    });
                 }
-
-                map = [data sortedArrayUsingComparator:^NSComparisonResult(NSMutableArray *a, NSMutableArray *b) {
-                    return [b[1] compare: a[1]];
-                }];
-
-                data = nil;
-
-                count = num;
             }
-        }
+        });
     }
     
     return result;
@@ -145,10 +151,18 @@ NSString *preferencesUIPath = @"/System/Library/PrivateFrameworks/PreferencesUI.
     if ([[self specifier].identifier isEqualToString:@"MOBILE_DATA_SETTINGS_ID"] && indexPath.section == cellularSectionNumber && indexPath.row == 0) {
         enabled = !enabled;
         
-        [view reloadData];
+        [self animatedReloadDataWithView:view];
     }
     
     %orig;
+}
+
+%new
+- (void)animatedReloadDataWithView:(id)view {
+    [UIView transitionWithView:view duration:0.2f options:UIViewAnimationOptionTransitionCrossDissolve animations: ^(void) {
+        [view reloadData];
+    }
+        completion:nil];
 }
 
 %end

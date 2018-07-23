@@ -4,6 +4,7 @@
 
 @interface PSListController : UITableViewController
 - (PSSpecifier *)specifier;
+- (void)animatedReloadDataWithView:(id)view;
 @end
 
 @interface PSSubtitleSwitchTableCell

@@ -7,20 +7,29 @@ NSInteger count, cellularSectionNumber;
 NSString *cellularDataTitle;
 
 BOOL enabled = YES;
-BOOL didLoadStrings = NO;
+
+NSString *preferencesApp = @"/Applications/Preferences.app";
+NSString *preferencesUIPath = @"/System/Library/PrivateFrameworks/PreferencesUI.framework";
 
 - (NSInteger)numberOfSectionsInTableView:(id)view {
     NSInteger result = %orig;
 
     if ([[self specifier].identifier isEqualToString:@"MOBILE_DATA_SETTINGS_ID"]) {
-        if (!didLoadStrings) {            
-            didLoadStrings = YES;
+        if ([cellularDataTitle length] == 0) {
+            NSBundle *stringBundle;
 
-            NSBundle *preferencesUI = [NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/PreferencesUI.framework"];
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+
+            if ([fileManager fileExistsAtPath:preferencesUIPath]) {
+                stringBundle = [NSBundle bundleWithPath:preferencesUIPath];
+            } else if ([fileManager fileExistsAtPath:preferencesApp]) {
+                stringBundle = [NSBundle bundleWithPath:preferencesApp];
+            }
             
-            cellularDataTitle = [preferencesUI localizedStringForKey:@"APP_DATA_USAGE" value:@"" table:@"Network~iphone"];
+            cellularDataTitle = [stringBundle localizedStringForKey:@"APP_DATA_USAGE" value:@"" table:@"Network~iphone"];
 
-            preferencesUI = nil;
+            stringBundle = nil;
+            fileManager = nil;
         }
 
         if ([[self tableView:view titleForHeaderInSection:0] isEqualToString:cellularDataTitle])
@@ -31,6 +40,14 @@ BOOL didLoadStrings = NO;
             cellularSectionNumber = 2;
         else if ([[self tableView:view titleForHeaderInSection:3] isEqualToString:cellularDataTitle])
             cellularSectionNumber = 3;
+        else if ([[self tableView:view titleForHeaderInSection:4] isEqualToString:cellularDataTitle])
+            cellularSectionNumber = 4;
+        else if ([[self tableView:view titleForHeaderInSection:5] isEqualToString:cellularDataTitle])
+            cellularSectionNumber = 5;
+        else if ([[self tableView:view titleForHeaderInSection:6] isEqualToString:cellularDataTitle])
+            cellularSectionNumber = 6;
+        else if ([[self tableView:view titleForHeaderInSection:7] isEqualToString:cellularDataTitle])
+            cellularSectionNumber = 7;
     }
 
     return result;

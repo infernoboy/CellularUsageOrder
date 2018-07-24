@@ -1,7 +1,7 @@
 Package: com.toggleable.cellularusageorderxi
 Name: CellularUsageOrderXI
 Depends: firmware (>= 7.0), mobilesubstrate
-Version: 1.0.3
+Version: 1.0.4
 Architecture: iphoneos-arm
 Description: Sort celluar data based on usage.
 Maintainer: Travis Roman <travis@toggleable.com>
